@@ -1,0 +1,85 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      min-width: 2000px;
+    }
+    body.grab-mode {
+      cursor: url(/cursors/openhand.cur) 8 8, move;
+      /*cursor: grab;
+      cursor: -webkit-grab;
+      cursor: -moz-grab;*/
+    }
+    body.grab-mode.grabbing {
+      cursor: url(/cursors/closedhand.cur) 8 8, move;
+      /*cursor: grabbing;
+      cursor: -webkit-grabbing;
+      cursor: -moz-grabbing;*/
+    }
+  </style>
+<body>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script>
+    var grabbing = false,
+        x0, y0, 
+        b = $('body');
+
+    for (var i=0; i<256; i++) {
+      var line = '';
+      for (var j=0; j<i; j++) {
+        line += '-';
+      }
+      b.append($('<div>').text(line));
+    }
+
+    b.dblclick(function() {
+      b.toggleClass('grab-mode');
+    })
+    .keydown(function(e) {
+      if (e.which == 71) {
+        // press G
+        b.toggleClass('grab-mode');
+      }
+    })
+    .mousedown(function(e) {
+      if (b.hasClass('grab-mode')) {
+        x0 = e.pageX;
+        y0 = e.pageY;
+        console.log('down (' + x0 + ', ' + y0 + ')');
+        e.preventDefault();
+        b.toggleClass('grabbing', true);
+      }
+    })
+    .mousemove(function(e) {
+      if (b.hasClass('grab-mode') && x0) {
+        var dx = e.pageX - x0,
+            dy = e.pageY - y0,
+            currentX = b.scrollLeft(),
+            currentY = b.scrollTop();
+        $('body,html')
+            .scrollLeft(currentX - dx)
+            .scrollTop(currentY - dy);
+        console.log('move (' + dx + ', ' + dy + ')');
+        b.toggleClass('grabbing', true);
+      }
+    })
+    .mouseup(function(e) {
+      if (b.hasClass('grab-mode')) {
+        console.log('up (' + x0 + ', ' + y0 + ')');
+        x0 = undefined;
+        y0 = undefined;
+        b.toggleClass('grabbing', false);
+      }
+    })
+    .mouseleave(function(e) {
+      if (b.hasClass('grab-mode')) {
+        console.log('leave (' + x0 + ', ' + y0 + ')');
+        x0 = undefined;
+        y0 = undefined;
+        b.toggleClass('grabbing', false);
+      }
+    });
+  </script>
+</body>
